@@ -17,6 +17,17 @@ namespace kar {
 
   using namespace std::placeholders;
 
+  class KarLoggerBase 
+  {
+    // base class for Kar logger 
+  };
+
+  class KarBase
+  {
+    // define logging base methods
+    // ...
+  };
+
   class Message 
   {
   public:
@@ -58,7 +69,6 @@ namespace kar {
   };
 
 
-
   class Node 
   {
   public:
@@ -66,13 +76,20 @@ namespace kar {
 
     void registerService( Service& service)
     {
-		// using bind
-		//service.registerSendMessageMethod( std::bind(&Bus::queueMessageForSending, this, _1) );
-		//mServicesDictionaire[service.name()] = std::bind(&Service::receiveMessage, &service, _1);
+		  // using bind
+		  //service.registerSendMessageMethod( std::bind(&Bus::queueMessageForSending, this, _1) );
+		  //mServicesDictionaire[service.name()] = std::bind(&Service::receiveMessage, &service, _1);
 
-		// using lambda
-		service.registerSendMessageMethod([this](Message message)-> void { this->queueMessageForSending( message); });
-		mServicesDictionaire[service.name()] = [&service](Message message) -> void { service.receiveMessage(message); };
+		  // using lambda
+		  service.registerSendMessageMethod([this](Message message)-> void { this->queueMessageForSending( message); });
+      
+      if( mServicesDictionaire[service.name()]){
+		    mServicesDictionaire[service.name()] = [&service](Message message) -> void { service.receiveMessage(message); };
+      }
+      else 
+      {
+        // output wrning message
+      }
     }
 
     void queueMessageForSending(Message message) 
@@ -94,9 +111,26 @@ namespace kar {
     std::map<std::string, std::function<void(Message Message)>> mServicesDictionaire;
   };
 
+  class TransportBase
+  {
 
+  };
+
+  class MessageCoderDecoderBase
+  {
+
+  };
+
+  class Bus 
+  {
+
+  };
+
+
+  class System 
+  {
+
+  };
   
-
-
 }// kar namespace
 
