@@ -42,32 +42,37 @@ namespace kar {
 
     void registerSendMessageMethod(std::function<void(Message message)> callback) 
     { 
-      mBusSendMessage = callback;
+      mNodeSendMessage = callback;
     }
-    void sendMessage(Message message) { mBusSendMessage(message); }
+    void sendMessage(Message message) { mNodeSendMessage(message); }
     void receiveMessage(Message message) 
     {
-      std::cout << "Service[" << mName << "]::receiveMessage : get a new message from ["<< message.origine() <<"] via bus\n";
+      std::cout << "Service[" << mName << "]::receiveMessage : get a new message from ["<< message.origine() <<"] via node\n";
     }
 
     std::string name() { return mName; }
 
   protected:
     std::string mName;
-    std::function<void(Message message)> mBusSendMessage;
+    std::function<void(Message message)> mNodeSendMessage;
   };
 
 
 
-  class Bus 
+  class Node 
   {
   public:
-    Bus() {}
+	Node(std::string name) : mName{name} {}
 
     void registerService( Service& service)
     {
-      service.registerSendMessageMethod( std::bind(&Bus::queueMessageForSending, this, _1) );
-      mServicesDictionaire[service.name()] = std::bind(&Service::receiveMessage, &service, _1);
+		// using bind
+		//service.registerSendMessageMethod( std::bind(&Bus::queueMessageForSending, this, _1) );
+		//mServicesDictionaire[service.name()] = std::bind(&Service::receiveMessage, &service, _1);
+
+		// using lambda
+		service.registerSendMessageMethod([this](Message message)-> void { this->queueMessageForSending( message); });
+		mServicesDictionaire[service.name()] = [&service](Message message) -> void { service.receiveMessage(message); };
     }
 
     void queueMessageForSending(Message message) 
@@ -85,8 +90,8 @@ namespace kar {
     }
 
   protected:
+	std::string mName;
     std::map<std::string, std::function<void(Message Message)>> mServicesDictionaire;
-
   };
 
 
