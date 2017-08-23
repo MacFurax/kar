@@ -13,6 +13,9 @@
 
 #include <gsl\gsl>
 
+#include <g3log\g3log.hpp>
+#include <g3log/logworker.hpp>
+
 namespace kar {
 
 	// needed to use std::bind
@@ -27,21 +30,32 @@ namespace kar {
 			if (firstInit)
 			{
 				firstInit = false;
-				std::cout << "Base first init\n";
+				//std::cout << "Base first init\n";
+
 				// initialize once member variables/objects
-				// like logger
+
+				static auto worker = g3::LogWorker::createLogWorker();
+				static auto handle = worker->addDefaultLogger("kar", "./");
+				g3::initializeLogging(worker.get());
+
+				LOG(INFO) << "Logging initialized";
+
 			}
 			else 
 			{
-				std::cout << "Base already initialized\n";
+				// every time initialization
+				//std::cout << "Base already initialized\n";
 			}
 		}
 
 	protected:
 		static bool firstInit;
+
   };
 
 	bool Base::firstInit = true;
+
+
 
   class Message : public Base
   {
@@ -74,6 +88,7 @@ namespace kar {
     void receiveMessage(Message message) 
     {
       std::cout << "Service[" << mName << "]::receiveMessage : get a new message from ["<< message.origine() <<"] via node\n";
+			LOG(INFO) << "Service[" << mName << "]::receiveMessage : get a new message from [" << message.origine() << "] via node\n";
     }
 
     std::string name() { return mName; }
@@ -96,6 +111,7 @@ namespace kar {
       if( mServicesDictionaire[service.name()] )
 			{
 				std::cout << "WARNING : Service [" << service.name() << "] already registered\n";
+				LOG(WARNING) << "Service [" << service.name() << "] already registered\n";
       }
       else 
       {
