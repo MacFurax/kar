@@ -11,22 +11,37 @@
 #include <map>
 #include <functional>
 
-
+#include <gsl\gsl>
 
 namespace kar {
 
+	// needed to use std::bind
   using namespace std::placeholders;
-
-  class LoggerBase 
-  {
-    // base class for Kar logger 
-  };
 
   class Base
   {
-    // define logging base methods
-    // ...
+	public:
+		Base()
+		{
+			
+			if (firstInit)
+			{
+				firstInit = false;
+				std::cout << "Base first init\n";
+				// initialize once member variables/objects
+				// like logger
+			}
+			else 
+			{
+				std::cout << "Base already initialized\n";
+			}
+		}
+
+	protected:
+		static bool firstInit;
   };
+
+	bool Base::firstInit = true;
 
   class Message : public Base
   {
@@ -40,8 +55,8 @@ namespace kar {
     std::vector<char> data() { return mData; }
 
   protected:
-    std::string mTarget = "";
-    std::string mOrigine= "";
+    std::string mTarget  = "";
+    std::string mOrigine = "";
     std::vector<char> mData;
   };
 
@@ -74,32 +89,37 @@ namespace kar {
   public:
 	Node(std::string name) : mName{name} {}
 
-    void registerService( Service& service)
+    bool registerService( Service& service)
     {
+			bool registered = false;
 
-		  // using bind
-		  //service.registerSendMessageMethod( std::bind(&Bus::queueMessageForSending, this, _1) );
-		  //mServicesDictionaire[service.name()] = std::bind(&Service::receiveMessage, &service, _1);
-
-		  // using lambda
-		  service.registerSendMessageMethod([this](Message message)-> void { this->queueMessageForSending( message); });
-      
       if( mServicesDictionaire[service.name()] )
 			{
 				std::cout << "WARNING : Service [" << service.name() << "] already registered\n";
       }
       else 
       {
-				mServicesDictionaire[service.name()] = [&service](Message message) -> void { service.receiveMessage(message); };
-      }
 
+				// using std::bind
+				//service.registerSendMessageMethod( std::bind(&Bus::queueMessageForSending, this, _1) );
+				//mServicesDictionaire[service.name()] = std::bind(&Service::receiveMessage, &service, _1);
+
+				// using lambda
+				service.registerSendMessageMethod([this](Message message)-> void { this->queueMessageForSending(message); });
+				mServicesDictionaire[service.name()] = [&service](Message message) -> void { service.receiveMessage(message); };
+				registered = true;
+
+      }
+			return registered;
     }
 
+		// this method will be passed to the services to allow them to send message to the bus trough the Node
     void queueMessageForSending(Message message) 
     {
       std::cout << "Bus::queueMessageForSending : Queue message from [" << message.origine() <<"] to ["<< message.target() <<"] for sending \n";
     }
 
+		// this used the service registered receiveMessage to send them message targeted to them
     void giveMessageToService( std::string serviceName, Message message) 
     {
       std::function<void(Message Message)> serviceReceiveMessage = mServicesDictionaire[serviceName];
@@ -110,7 +130,7 @@ namespace kar {
     }
 
   protected:
-	std::string mName;
+		std::string mName;
     std::map<std::string, std::function<void(Message Message)>> mServicesDictionaire;
   };
 

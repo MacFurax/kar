@@ -15,13 +15,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="kar.hpp">
+    <None Include="include\gsl\gsl">
       <Filter>Header Files</Filter>
-    </ClInclude>
+    </None>
+    <None Include="include\gsl\gsl_algorithm">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\gsl\gsl_assert">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\gsl\gsl_byte">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\gsl\gsl_util">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\gsl\multi_span">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\gsl\span">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\gsl\string_span">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="karTest.cpp">
+    <ClCompile Include="src\karTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\kar.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
