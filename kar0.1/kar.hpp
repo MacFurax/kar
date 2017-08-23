@@ -17,18 +17,18 @@ namespace kar {
 
   using namespace std::placeholders;
 
-  class KarLoggerBase 
+  class LoggerBase 
   {
     // base class for Kar logger 
   };
 
-  class KarBase
+  class Base
   {
     // define logging base methods
     // ...
   };
 
-  class Message 
+  class Message : public Base
   {
   public:
     Message() {}
@@ -46,7 +46,7 @@ namespace kar {
   };
 
 
-  class Service
+  class Service : public Base
   {
   public:
     Service(std::string name) : mName(name) {}
@@ -69,13 +69,14 @@ namespace kar {
   };
 
 
-  class Node 
+  class Node : public Base
   {
   public:
 	Node(std::string name) : mName{name} {}
 
     void registerService( Service& service)
     {
+
 		  // using bind
 		  //service.registerSendMessageMethod( std::bind(&Bus::queueMessageForSending, this, _1) );
 		  //mServicesDictionaire[service.name()] = std::bind(&Service::receiveMessage, &service, _1);
@@ -83,13 +84,15 @@ namespace kar {
 		  // using lambda
 		  service.registerSendMessageMethod([this](Message message)-> void { this->queueMessageForSending( message); });
       
-      if( mServicesDictionaire[service.name()]){
-		    mServicesDictionaire[service.name()] = [&service](Message message) -> void { service.receiveMessage(message); };
+      if( mServicesDictionaire[service.name()] )
+			{
+				std::cout << "WARNING : Service [" << service.name() << "] already registered\n";
       }
       else 
       {
-        // output wrning message
+				mServicesDictionaire[service.name()] = [&service](Message message) -> void { service.receiveMessage(message); };
       }
+
     }
 
     void queueMessageForSending(Message message) 
@@ -111,23 +114,23 @@ namespace kar {
     std::map<std::string, std::function<void(Message Message)>> mServicesDictionaire;
   };
 
-  class TransportBase
+  class TransportBase : public Base
   {
 
   };
 
-  class MessageCoderDecoderBase
+  class MessageCoderDecoderBase : public Base
   {
 
   };
 
-  class Bus 
+  class Bus : public Base
   {
 
   };
 
 
-  class System 
+  class System : public Base
   {
 
   };
