@@ -33,10 +33,10 @@ namespace kar {
 				//std::cout << "Base first init\n";
 
 				// initialize once member variables/objects
-
-				static auto worker = g3::LogWorker::createLogWorker();
-				static auto handle = worker->addDefaultLogger("kar", "./");
-				g3::initializeLogging(worker.get());
+				
+				mLogWorker = g3::LogWorker::createLogWorker();
+				mFSHandle = mLogWorker->addDefaultLogger("kar", "./");
+				g3::initializeLogging(mLogWorker.get());
 
 				LOG(INFO) << "Logging initialized";
 
@@ -50,10 +50,15 @@ namespace kar {
 
 	protected:
 		static bool firstInit;
-
+		static std::unique_ptr<g3::LogWorker> mLogWorker;
+		static std::unique_ptr<g3::FileSinkHandle> mFSHandle;
   };
 
+	// static members of class Base
 	bool Base::firstInit = true;
+	std::unique_ptr<g3::LogWorker> Base::mLogWorker;
+	std::unique_ptr<g3::FileSinkHandle> Base::mFSHandle;
+
 
 
 
@@ -87,8 +92,8 @@ namespace kar {
     void sendMessage(Message message) { mNodeSendMessage(message); }
     void receiveMessage(Message message) 
     {
-      std::cout << "Service[" << mName << "]::receiveMessage : get a new message from ["<< message.origine() <<"] via node\n";
-			LOG(INFO) << "Service[" << mName << "]::receiveMessage : get a new message from [" << message.origine() << "] via node\n";
+      //std::cout << "Service[" << mName << "]::receiveMessage : get a new message from ["<< message.origine() <<"] via node\n";
+			LOG(INFO) << "Service[" << mName << "]::receiveMessage : get a new message from [" << message.origine() << "] via node";
     }
 
     std::string name() { return mName; }
@@ -110,8 +115,8 @@ namespace kar {
 
       if( mServicesDictionaire[service.name()] )
 			{
-				std::cout << "WARNING : Service [" << service.name() << "] already registered\n";
-				LOG(WARNING) << "Service [" << service.name() << "] already registered\n";
+				//std::cout << "WARNING : Service [" << service.name() << "] already registered\n";
+				LOG(WARNING) << "Service [" << service.name() << "] already registered";
       }
       else 
       {
@@ -132,7 +137,8 @@ namespace kar {
 		// this method will be passed to the services to allow them to send message to the bus trough the Node
     void queueMessageForSending(Message message) 
     {
-      std::cout << "Bus::queueMessageForSending : Queue message from [" << message.origine() <<"] to ["<< message.target() <<"] for sending \n";
+      //std::cout << "Bus::queueMessageForSending : Queue message from [" << message.origine() <<"] to ["<< message.target() <<"] for sending \n";
+			LOG(INFO) << "Bus::queueMessageForSending : Queue message from [" << message.origine() << "] to [" << message.target() << "] for sending";
     }
 
 		// this used the service registered receiveMessage to send them message targeted to them
