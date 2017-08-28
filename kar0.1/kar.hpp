@@ -45,6 +45,24 @@ namespace kar {
     std::vector<char> mData;
   };
 
+  class Buffer
+  {
+  public:
+    Buffer() {}
+    Buffer(std::unique_ptr<std::vector<char>> buffer, int size)
+    {
+      mBuffer = std::move(buffer);
+      mSize = size;
+    }
+
+    const char* data() { mBuffer->data(); }
+    const int size() { return mSize; }
+
+  private:
+    std::unique_ptr<std::vector<char>> mBuffer;
+    int mSize = 0;
+  };
+
 
   class Service
   {
@@ -113,7 +131,31 @@ namespace kar {
 
   class TransportBase
   {
+  public:
+    TransportBase() {}
+    ~TransportBase() {}
 
+    // this will do the work to send and receive buffers from the underlying transport
+    void virtual run() {}
+
+  private:
+    int sendBuffer( std::unique_ptr<Buffer> buffer) 
+    {
+      mToSendBuffers.push(std::move(buffer));
+      return mToSendBuffers.size();
+    }
+
+    int getBuffer(std::unique_ptr<Buffer> buffer)
+    {
+      if (mReceivedBuffers.size() == 0) return -1;
+      buffer = std::move(mReceivedBuffers.front());
+      mReceivedBuffers.pop();
+      return mReceivedBuffers.size();
+      return 1;
+    }
+
+    std::queue<std::unique_ptr<Buffer>> mToSendBuffers;
+    std::queue<std::unique_ptr<Buffer>> mReceivedBuffers;
   };
 
   class MessageCoderDecoderBase
